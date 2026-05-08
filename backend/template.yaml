@@ -1,0 +1,391 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Memoized weather backend for in-field screens
+
+Parameters:
+  WeatherProviderParam:
+    Type: String
+    AllowedValues: [open-meteo, google]
+    Default: open-meteo
+    Description: Active weather provider strategy.
+  NwsUserAgentParam:
+    Type: String
+    MinLength: 5
+    Description: User-Agent header for NWS API. NWS rejects requests without one. Example "weather-backend (ops@example.com)".
+  NominatimUserAgentParam:
+    Type: String
+    MinLength: 5
+    Default: dolphin weather dolphin-digital.com dane@dolphin-digital.com
+    Description: User-Agent header for Nominatim reverse geocoding. Required by Nominatim usage policy.
+  GoogleWeatherApiKeyParam:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Required only when WeatherProviderParam=google.
+  CorsAllowOriginParam:
+    Type: String
+    Default: "'*'"
+    Description: Single CloudFront origin for CORS, single-quoted (e.g. "'https://d1example.cloudfront.net'").
+
+Globals:
+  Function:
+    Runtime: nodejs24.x
+    Architectures:
+      - x86_64
+    Timeout: 30
+    MemorySize: 256
+    Tracing: Active
+    LoggingConfig:
+      LogFormat: JSON
+    Environment:
+      Variables:
+        LOG_LEVEL: info
+        POWERTOOLS_SERVICE_NAME: weather-backend
+        POWERTOOLS_METRICS_NAMESPACE: WeatherBackend
+        WEATHER_PROVIDER: !Ref WeatherProviderParam
+        GOOGLE_WEATHER_API_KEY: !Ref GoogleWeatherApiKeyParam
+        NWS_USER_AGENT: !Ref NwsUserAgentParam
+        NOMINATIM_USER_AGENT: !Ref NominatimUserAgentParam
+        GEOCODE_TABLE: !Ref GeocodeTable
+        WEATHER_TABLE: !Ref WeatherTable
+        ALERTS_TABLE: !Ref AlertsTable
+        WEATHER_QUEUE_URL: !Ref WeatherQueue
+        CITY_LOOKUP_QUEUE_URL: !Ref CityLookupQueue
+
+Resources:
+  GeocodeTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  WeatherTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  AlertsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  WeatherQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: weather-dlq.fifo
+      FifoQueue: true
+      MessageRetentionPeriod: 1209600
+
+  WeatherQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: weather.fifo
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      DeduplicationScope: messageGroup
+      FifoThroughputLimit: perMessageGroupId
+      VisibilityTimeout: 60
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt WeatherQueueDLQ.Arn
+        maxReceiveCount: 3
+
+  CityLookupQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: city-lookup-dlq.fifo
+      FifoQueue: true
+      MessageRetentionPeriod: 1209600
+
+  CityLookupQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: city-lookup.fifo
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      VisibilityTimeout: 60
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt CityLookupQueueDLQ.Arn
+        maxReceiveCount: 3
+
+  WeatherApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Auth:
+        ApiKeyRequired: true
+      Cors:
+        AllowOrigin: !Ref CorsAllowOriginParam
+        AllowHeaders: "'Content-Type,x-api-key'"
+        AllowMethods: "'GET,OPTIONS'"
+        MaxAge: "'600'"
+      MethodSettings:
+        - ResourcePath: /*
+          HttpMethod: '*'
+          ThrottlingBurstLimit: 100
+          ThrottlingRateLimit: 50
+          MetricsEnabled: true
+
+  ApiUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    DependsOn: WeatherApiprodStage
+    Properties:
+      UsagePlanName: weather-backend-shared
+      Description: Single shared key usage plan for all field screens.
+      Throttle:
+        BurstLimit: 100
+        RateLimit: 50
+      Quota:
+        Limit: 200000
+        Period: DAY
+      ApiStages:
+        - ApiId: !Ref WeatherApi
+          Stage: prod
+
+  ReadWeatherFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: readWeather.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref GeocodeTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref WeatherTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref AlertsTable
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt WeatherQueue.QueueName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt CityLookupQueue.QueueName
+      Events:
+        GetWeather:
+          Type: Api
+          Properties:
+            RestApiId: !Ref WeatherApi
+            Path: /weather
+            Method: GET
+            Auth:
+              ApiKeyRequired: true
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: true
+        Sourcemap: true
+        Target: node24
+        OutExtension:
+          - .js=.mjs
+        Banner:
+          - js=import { createRequire as topLevelCreateRequire } from 'module'; const require = topLevelCreateRequire(import.meta.url);
+        EntryPoints:
+          - src/handlers/readWeather.ts
+        External:
+          - '@aws-sdk/*'
+
+  FanoutFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: fanout.handler
+      Timeout: 60
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref GeocodeTable
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt WeatherQueue.QueueName
+      Events:
+        HourlyFanout:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 hour)
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: true
+        Sourcemap: true
+        Target: node24
+        OutExtension:
+          - .js=.mjs
+        Banner:
+          - js=import { createRequire as topLevelCreateRequire } from 'module'; const require = topLevelCreateRequire(import.meta.url);
+        EntryPoints:
+          - src/handlers/fanout.ts
+        External:
+          - '@aws-sdk/*'
+
+  FetchWorkerFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: fetchWorker.handler
+      Timeout: 60
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WeatherTable
+      Events:
+        WeatherQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt WeatherQueue.Arn
+            BatchSize: 5
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+            ScalingConfig:
+              MaximumConcurrency: 25
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: true
+        Sourcemap: true
+        Target: node24
+        OutExtension:
+          - .js=.mjs
+        Banner:
+          - js=import { createRequire as topLevelCreateRequire } from 'module'; const require = topLevelCreateRequire(import.meta.url);
+        EntryPoints:
+          - src/handlers/fetchWorker.ts
+        External:
+          - '@aws-sdk/*'
+
+  CityWorkerFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: cityWorker.handler
+      Timeout: 60
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref GeocodeTable
+      Events:
+        CityLookupQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt CityLookupQueue.Arn
+            BatchSize: 1
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+            ScalingConfig:
+              MaximumConcurrency: 2
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: true
+        Sourcemap: true
+        Target: node24
+        OutExtension:
+          - .js=.mjs
+        Banner:
+          - js=import { createRequire as topLevelCreateRequire } from 'module'; const require = topLevelCreateRequire(import.meta.url);
+        EntryPoints:
+          - src/handlers/cityWorker.ts
+        External:
+          - '@aws-sdk/*'
+
+  NwsPollerFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: nwsPoller.handler
+      Timeout: 60
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AlertsTable
+      Events:
+        TwoMinutePoll:
+          Type: Schedule
+          Properties:
+            Schedule: rate(2 minutes)
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: true
+        Sourcemap: true
+        Target: node24
+        OutExtension:
+          - .js=.mjs
+        Banner:
+          - js=import { createRequire as topLevelCreateRequire } from 'module'; const require = topLevelCreateRequire(import.meta.url);
+        EntryPoints:
+          - src/handlers/nwsPoller.ts
+        External:
+          - '@aws-sdk/*'
+
+  EarthquakePollerFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: earthquakePoller.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AlertsTable
+      Events:
+        TenMinutePoll:
+          Type: Schedule
+          Properties:
+            Schedule: rate(10 minutes)
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: true
+        Sourcemap: true
+        Target: node24
+        OutExtension:
+          - .js=.mjs
+        Banner:
+          - js=import { createRequire as topLevelCreateRequire } from 'module'; const require = topLevelCreateRequire(import.meta.url);
+        EntryPoints:
+          - src/handlers/earthquakePoller.ts
+        External:
+          - '@aws-sdk/*'
+
+Outputs:
+  ApiUrl:
+    Description: Base URL for the weather REST API.
+    Value: !Sub https://${WeatherApi}.execute-api.${AWS::Region}.amazonaws.com/prod
+  UsagePlanId:
+    Description: Usage plan ID. Phase 9 bootstrap script attaches the API key here.
+    Value: !Ref ApiUsagePlan
+  GeocodeTableName:
+    Value: !Ref GeocodeTable
+  WeatherTableName:
+    Value: !Ref WeatherTable
+  AlertsTableName:
+    Value: !Ref AlertsTable
+  WeatherQueueUrl:
+    Value: !Ref WeatherQueue
+  WeatherQueueArn:
+    Value: !GetAtt WeatherQueue.Arn
+  WeatherDLQUrl:
+    Value: !Ref WeatherQueueDLQ
+  CityLookupQueueUrl:
+    Value: !Ref CityLookupQueue
+  CityLookupDLQUrl:
+    Value: !Ref CityLookupQueueDLQ

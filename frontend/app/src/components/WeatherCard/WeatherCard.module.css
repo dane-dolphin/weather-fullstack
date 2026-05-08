@@ -1,0 +1,66 @@
+.card {
+  position: relative;
+  width: 100%;
+  height: var(--app-vh);
+  padding: 32px 40px 26px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Margin-based flex child spacing — flex gap unsupported in Chrome 79 */
+.card > * + * {
+  margin-top: 16px;
+}
+
+/* Main grid — landscape (default): 2-col, hero left, stats right, bottom spans full */
+.main {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 16px;
+}
+
+/* Stats: vertical stack in landscape */
+.stats {
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+/* Bottom row spans both grid columns in landscape */
+.bottom {
+  grid-column: 1 / -1;
+}
+
+/* ── Portrait overrides ────────────────────────────────────────────────── */
+
+[data-orientation="portrait"] .card {
+  padding: clamp(28px, 3.5vh, 72px) clamp(24px, 2.5vw, 56px) clamp(24px, 3vh, 60px);
+}
+
+[data-orientation="portrait"] .card > * + * {
+  margin-top: clamp(14px, 1.8vh, 36px);
+}
+
+/* Single-column grid; hero fills remaining space */
+[data-orientation="portrait"] .main {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto auto;
+  gap: clamp(10px, 1.4vh, 28px);
+}
+
+/* Stats: 3 cards side-by-side in portrait */
+[data-orientation="portrait"] .stats {
+  grid-template-rows: auto;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+[data-orientation="portrait"] .bottom {
+  grid-column: 1;
+}
+
+

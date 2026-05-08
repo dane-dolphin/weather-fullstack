@@ -1,0 +1,18 @@
+version = 0.1
+
+[default.global.parameters]
+stack_name = "weather-backend"
+region = "us-east-1"
+
+[default.build.parameters]
+cached = false
+parallel = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+region = "us-east-1"
+s3_prefix = "weather-backend"
+parameter_overrides = "WeatherProviderParam=\"open-meteo\" NwsUserAgentParam=\"dolphin-weather (https://dolphin-digital.com, dane@dolphin-digital.com)\" CorsAllowOriginParam=\"'*'\""
+image_repositories = []

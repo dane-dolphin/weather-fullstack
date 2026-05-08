@@ -1,0 +1,69 @@
+{
+    "lat": 37.322998,
+    "lon": -122.032181,
+    "as_of": "2026-05-08T02:07:29.834Z",
+    "location": {
+        "state": "CA",
+        "county_zone": "CAC085",
+        "forecast_zone": "CAZ513",
+        "time_zone": "America/Los_Angeles"
+    },
+    "weather": {
+        "sunrise": "2026-05-07T06:06",
+        "apparentTemp": 61.3,
+        "weatherCode": 0,
+        "forecast": [
+            {
+                "precipProbability": 0,
+                "temp": 63,
+                "time": "2026-05-07T19:00",
+                "weatherCode": 0,
+                "isDay": true
+            },
+            {
+                "precipProbability": 0,
+                "temp": 57.9,
+                "time": "2026-05-07T20:00",
+                "weatherCode": 0,
+                "isDay": true
+            },
+            {
+                "precipProbability": 0,
+                "temp": 55.1,
+                "time": "2026-05-07T21:00",
+                "weatherCode": 0,
+                "isDay": false
+            },
+            {
+                "precipProbability": 0,
+                "temp": 53.7,
+                "time": "2026-05-07T22:00",
+                "weatherCode": 2,
+                "isDay": false
+            },
+            {
+                "precipProbability": 0,
+                "temp": 53.1,
+                "time": "2026-05-07T23:00",
+                "weatherCode": 3,
+                "isDay": false
+            }
+        ],
+        "fetchedAt": "2026-05-08T02:07:29.337Z",
+        "source": "open-meteo",
+        "dailyWeatherCode": 45,
+        "isDay": true,
+        "precipitation": 0,
+        "high": 73.1,
+        "low": 53.1,
+        "sunset": "2026-05-07T20:03",
+        "humidity": 70,
+        "currentTemp": 63,
+        "windDirection": 28,
+        "windSpeed": 9.8,
+        "fetched_at": 1778206049,
+        "is_stale": false
+    },
+    "alerts": [],
+    "earthquakes": []
+}

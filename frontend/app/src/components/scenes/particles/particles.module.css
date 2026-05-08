@@ -1,0 +1,178 @@
+/* ── Cloud ─────────────────────────────────────────────────────── */
+
+.cloud {
+  position: absolute;
+  border-radius: 100px;
+}
+
+.drifting {
+  animation: cloudDrift linear infinite;
+}
+
+@keyframes cloudDrift {
+  from { transform: translateX(var(--cloud-start-x, -200px)); }
+  to   { transform: translateX(1500px); }
+}
+
+/* ── Stars ─────────────────────────────────────────────────────── */
+
+.starField {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── Shooting star ─────────────────────────────────────────────── */
+
+.shootContainer {
+  position: absolute;
+  top: 18%;
+  left: 60%;
+  width: 0;
+  height: 0;
+  animation: shoot 7s ease-in infinite;
+}
+
+.shootTrail {
+  position: absolute;
+  width: 80px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #fff);
+  transform: rotate(20deg);
+  transform-origin: left center;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes shoot {
+  0%,  80% { transform: translate(0, 0);         opacity: 0; }
+  82%       { opacity: 1; }
+  90%       { transform: translate(180px, 60px);  opacity: 1; }
+  92%, 100% { transform: translate(220px, 75px);  opacity: 0; }
+}
+
+/* ── Rain ──────────────────────────────────────────────────────── */
+
+.rainField {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.rainField span {
+  position: absolute;
+  top: -20px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent, #9DC1F0);
+  animation: rainFall linear infinite;
+}
+
+.rainFieldLight span {
+  background: linear-gradient(180deg, transparent, rgba(180, 200, 230, 0.7));
+  width: 1.5px;
+}
+
+.rainFieldFreezing span {
+  background: linear-gradient(180deg, transparent, #BEE6FF);
+}
+
+@keyframes rainFall {
+  from { transform: translate(0, -20vh); }
+  to   { transform: translate(-30px, 110vh); }
+}
+
+/* ── Snow ──────────────────────────────────────────────────────── */
+
+.snowField {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.flakeA,
+.flakeB {
+  position: absolute;
+  top: -20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.flakeA { animation: snowFallA linear infinite; }
+.flakeB { animation: snowFallB linear infinite; }
+
+@keyframes snowFallA {
+  0%   { transform: translate(0, -20vh) rotate(0deg); }
+  50%  { transform: translate(20px, 50vh) rotate(180deg); }
+  100% { transform: translate(0, 110vh) rotate(360deg); }
+}
+
+@keyframes snowFallB {
+  0%   { transform: translate(0, -20vh) rotate(0deg); }
+  50%  { transform: translate(-20px, 50vh) rotate(-180deg); }
+  100% { transform: translate(0, 110vh) rotate(-360deg); }
+}
+
+/* ── Hail ──────────────────────────────────────────────────────── */
+
+.hailField {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.hailStone {
+  position: absolute;
+  top: -20px;
+  background: rgba(240, 250, 255, 0.95);
+  border-radius: 50%;
+  box-shadow: inset -1px -1px 2px rgba(120, 140, 170, 0.5), 0 0 4px rgba(255, 255, 255, 0.5);
+  animation: rainFall linear infinite;
+}
+
+/* ── Lightning flash ───────────────────────────────────────────── */
+
+.lightningFlash {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0);
+  pointer-events: none;
+  animation: lightningFlash 7s ease-out infinite;
+}
+
+.lightningFlash2 {
+  animation-delay: 3.5s;
+}
+
+@keyframes lightningFlash {
+  0%,  88%, 100% { background: rgba(255, 255, 255, 0); }
+  89%            { background: rgba(255, 255, 255, 0.6); }
+  90%            { background: rgba(255, 255, 255, 0); }
+  91%            { background: rgba(255, 255, 255, 0.85); }
+  93%            { background: rgba(255, 255, 255, 0); }
+}

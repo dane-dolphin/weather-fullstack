@@ -1,0 +1,39 @@
+.container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+/* Each glyph is absolutely centered in the container, then orbits via translation */
+.orbiter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -40px;  /* half of glyph size */
+  margin-top: -40px;
+  animation: orbit 3s linear infinite;
+}
+
+.moon {
+  animation-delay: -1.5s; /* 180° out of phase = half the period */
+}
+
+/* Circular orbit via translate keyframes — no rotation so glyphs stay upright */
+@keyframes orbit {
+  0%   { transform: translate(0px,  -58px); }
+  25%  { transform: translate(58px,   0px); }
+  50%  { transform: translate(0px,   58px); }
+  75%  { transform: translate(-58px,  0px); }
+  100% { transform: translate(0px,  -58px); }
+}
+
+/* Soft glow trail behind each glyph */
+.orbiter > * {
+  -webkit-filter: drop-shadow(0 0 12px rgba(255, 200, 80, 0.5));
+  filter: drop-shadow(0 0 12px rgba(255, 200, 80, 0.5));
+}
+
+.moon > * {
+  -webkit-filter: drop-shadow(0 0 12px rgba(180, 160, 255, 0.5));
+  filter: drop-shadow(0 0 12px rgba(180, 160, 255, 0.5));
+}

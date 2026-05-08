@@ -1,0 +1,18 @@
+export type CompassPoint =
+  | 'N' | 'NNE' | 'NE' | 'ENE'
+  | 'E' | 'ESE' | 'SE' | 'SSE'
+  | 'S' | 'SSW' | 'SW' | 'WSW'
+  | 'W' | 'WNW' | 'NW' | 'NNW';
+
+const POINTS: readonly CompassPoint[] = [
+  'N', 'NNE', 'NE', 'ENE',
+  'E', 'ESE', 'SE', 'SSE',
+  'S', 'SSW', 'SW', 'WSW',
+  'W', 'WNW', 'NW', 'NNW',
+];
+
+export function compass(deg: number): CompassPoint {
+  const normalized = ((deg % 360) + 360) % 360;
+  const index = Math.round(normalized / 22.5) % 16;
+  return POINTS[index] as CompassPoint;
+}

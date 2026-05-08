@@ -1,0 +1,60 @@
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  border-radius: var(--radius-cell);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  opacity: 0.7;
+}
+
+/* Margin spacing — no flex gap in Chrome 79 */
+.cell > * + * {
+  margin-top: 5px;
+}
+
+.cell[data-now="true"] {
+  background: var(--hourly-now-grad);
+  border: 1px solid var(--hourly-now-border);
+  color: var(--hourly-now-color);
+  opacity: 1;
+  box-shadow: var(--hourly-now-shadow);
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Placeholder circle until T25 wires up HourGlyph */
+.glyph {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.2;
+}
+
+.temp {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+[data-orientation="portrait"] .cell {
+  padding: clamp(8px, 1.2vh, 20px) 4px;
+  font-size: clamp(11px, 1.4vh, 20px);
+}
+
+[data-orientation="portrait"] .cell > * + * {
+  margin-top: clamp(4px, 0.6vh, 10px);
+}
+
+[data-orientation="portrait"] .label {
+  font-size: clamp(11px, 1.4vh, 20px);
+}
+
+[data-orientation="portrait"] .temp {
+  font-size: clamp(16px, 2.2vh, 34px);
+}

@@ -1,0 +1,44 @@
+{
+  "name": "weather-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1042.0",
+    "@aws-sdk/lib-dynamodb": "^3.1042.0",
+    "@aws-sdk/client-sqs": "^3.1042.0",
+    "@aws-sdk/client-api-gateway": "^3.1042.0",
+    "@middy/core": "^7.4.0",
+    "@aws-lambda-powertools/logger": "^2.33.0",
+    "@aws-lambda-powertools/tracer": "^2.33.0",
+    "@aws-lambda-powertools/metrics": "^2.33.0",
+    "@aws-lambda-powertools/parser": "^2.33.0",
+    "@aws-lambda-powertools/batch": "^2.33.0",
+    "esbuild": "^0.28.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.161",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "aws-sdk-client-mock": "^4.1.0",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.0",
+    "jest": "^30.0.0",
+    "nock": "^14.0.0",
+    "prettier": "^3.8.3",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.59.0",
+    "@eslint/js": "^10.0.0"
+  }
+}

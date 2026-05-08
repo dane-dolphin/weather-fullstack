@@ -1,0 +1,16 @@
+.strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 12px;
+  border-radius: var(--radius-card);
+  background: var(--hourly-bg);
+  border: 1px solid var(--hourly-border);
+  backdrop-filter: blur(var(--hourly-blur));
+  box-shadow: var(--hourly-shadow);
+}
+
+[data-orientation="portrait"] .strip {
+  padding: 12px 10px;
+  border-radius: 22px;
+}

@@ -1,0 +1,124 @@
+.hero {
+  position: relative;
+  border-radius: 32px;
+  padding: clamp(20px, 3vh, 56px) clamp(24px, 3vw, 56px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--hero-bg);
+  border: 1px solid var(--hero-border);
+  box-shadow: var(--hero-shadow);
+  -webkit-backdrop-filter: blur(var(--hero-blur));
+  backdrop-filter: blur(var(--hero-blur));
+}
+
+.icon {
+  flex: 0 0 33.333%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Override the glyph's inline width/height so it scales with the hero text */
+.icon > svg {
+  width: auto;
+  height: clamp(120px, 16vw, 280px);
+  max-width: 100%;
+}
+
+.textBlock {
+  flex: 0 0 66.667%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.temp {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+}
+
+.tempNum {
+  font-size: clamp(80px, 10vw, 220px);
+  background: var(--temp-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* separate sup so it can use the orange dot color independent of the gradient */
+.tempDeg {
+  font-size: clamp(40px, 6vw, 78px);
+  margin-top: 6px;
+  color: var(--pill-dot);
+  vertical-align: top;
+}
+
+.feels {
+  margin-top: clamp(6px, 0.8vw, 18px);
+  font-size: clamp(15px, 1.4vw, 30px);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.feels strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Portrait: stack glyph above text, center everything */
+[data-orientation="portrait"] .hero {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(24px, 4vh, 80px) clamp(20px, 3vw, 56px);
+}
+
+[data-orientation="portrait"] .icon {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Override the glyph's inline width/height so it scales with the hero text */
+[data-orientation="portrait"] .icon > svg {
+  width: auto;
+  height: clamp(120px, 18vh, 320px);
+}
+
+[data-orientation="portrait"] .textBlock {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 0;
+  margin-top: clamp(20px, 4vh, 72px);
+}
+
+[data-orientation="portrait"] .temp {
+  justify-content: center;
+}
+
+[data-orientation="portrait"] .tempNum {
+  font-size: clamp(96px, 15vh, 260px);
+}
+
+[data-orientation="portrait"] .tempDeg {
+  font-size: clamp(48px, 7.5vh, 130px);
+  margin-top: clamp(6px, 1vh, 16px);
+}
+
+[data-orientation="portrait"] .feels {
+  margin-top: clamp(8px, 1.4vh, 24px);
+  font-size: clamp(15px, 2.2vh, 34px);
+}
