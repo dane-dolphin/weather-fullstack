@@ -1,0 +1,11 @@
+version = 0.1
+
+# This stack provisions only the S3 origin bucket.
+# CloudFront is created manually in the Console on the Pro plan ($15/month flat,
+# 10M requests / 50TB) — see the comment block at the top of template.yaml.
+
+[default.deploy.parameters]
+stack_name      = "weather-frontend"
+region          = "us-east-1"
+confirm_changeset = true
+resolve_s3      = true
