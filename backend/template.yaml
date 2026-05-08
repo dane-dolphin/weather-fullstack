@@ -24,8 +24,8 @@ Parameters:
     Description: Required only when WeatherProviderParam=google.
   CorsAllowOriginParam:
     Type: String
-    Default: "'*'"
-    Description: Single CloudFront origin for CORS, single-quoted (e.g. "'https://d1example.cloudfront.net'").
+    Default: "*"
+    Description: Single CloudFront origin for CORS, raw URL with no quotes (e.g. https://d1example.cloudfront.net). Use "*" only for testing.
 
 Globals:
   Function:
@@ -51,6 +51,7 @@ Globals:
         ALERTS_TABLE: !Ref AlertsTable
         WEATHER_QUEUE_URL: !Ref WeatherQueue
         CITY_LOOKUP_QUEUE_URL: !Ref CityLookupQueue
+        CORS_ALLOW_ORIGIN: !Ref CorsAllowOriginParam
 
 Resources:
   GeocodeTable:
@@ -140,10 +141,8 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
-      Auth:
-        ApiKeyRequired: true
       Cors:
-        AllowOrigin: !Ref CorsAllowOriginParam
+        AllowOrigin: !Sub "'${CorsAllowOriginParam}'"
         AllowHeaders: "'Content-Type,x-api-key'"
         AllowMethods: "'GET,OPTIONS'"
         MaxAge: "'600'"

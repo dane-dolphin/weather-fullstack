@@ -82,7 +82,11 @@ export async function baseHandler(
 
   return {
     statusCode: 200,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'max-age=60' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'max-age=60',
+      'Access-Control-Allow-Origin': config.CORS_ALLOW_ORIGIN,
+    },
     body: JSON.stringify({
       lat,
       lon,

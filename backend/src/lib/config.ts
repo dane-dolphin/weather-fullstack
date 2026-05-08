@@ -17,6 +17,7 @@ export const Env = z.object({
   ALERTS_TABLE: z.string(),
   WEATHER_QUEUE_URL: z.url().optional(),
   CITY_LOOKUP_QUEUE_URL: z.url().optional(),
+  CORS_ALLOW_ORIGIN: z.string().default('*'),
   AWS_REGION: z.string(),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   WEATHER_FRESH_SECONDS: z.coerce.number().default(7200),

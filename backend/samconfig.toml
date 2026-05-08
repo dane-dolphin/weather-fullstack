@@ -14,5 +14,5 @@ confirm_changeset = true
 resolve_s3 = true
 region = "us-east-1"
 s3_prefix = "weather-backend"
-parameter_overrides = "WeatherProviderParam=\"open-meteo\" NwsUserAgentParam=\"dolphin-weather (https://dolphin-digital.com, dane@dolphin-digital.com)\" CorsAllowOriginParam=\"'*'\""
+parameter_overrides = "WeatherProviderParam=\"open-meteo\" NwsUserAgentParam=\"dolphin-weather (https://dolphin-digital.com, dane@dolphin-digital.com)\" CorsAllowOriginParam=\"'https://d2wuawlurlul47.cloudfront.net'\""
 image_repositories = []

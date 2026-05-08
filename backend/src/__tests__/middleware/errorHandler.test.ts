@@ -21,6 +21,10 @@ jest.unstable_mockModule('../../lib/observability.js', () => ({
   metrics: {},
 }));
 
+jest.unstable_mockModule('../../lib/config.js', () => ({
+  config: { CORS_ALLOW_ORIGIN: '*' },
+}));
+
 let errorHandlerFn: typeof import('../../middleware/errorHandler.js')['errorHandler'];
 
 beforeAll(async () => {
